@@ -152,9 +152,18 @@ def drive(cfg, model_path=None, use_joystick=False, model_type=None,
     V.add(Lambda(lambda v: print(f"web/w4 clicked")), inputs=["web/w4"], run_condition="web/w4")
     V.add(Lambda(lambda v: print(f"web/w5 clicked")), inputs=["web/w5"], run_condition="web/w5")
 
-    #this throttle filter will allow one tap back for esc reverse
-    th_filter = ThrottleFilter()
-    V.add(th_filter, inputs=['user/throttle'], outputs=['user/throttle'])
+    #
+    # adding logic for progressive acceleration
+    #
+    if(cfg.USE_CONSTANT_THROTTLE == False):
+        for i in range(cfg.THROTTLE_MIN, cfg.THROTTLE_MAX, cfg.THROTTLE_STEP):
+            i = ThrottleFilter()
+            V.add(i, inputs=['user/throttle'], outputs=['user/throttle'])
+            
+    else:
+        #this throttle filter will allow one tap back for esc reverse
+        th_filter = ThrottleFilter()
+        V.add(th_filter, inputs=['user/throttle'], outputs=['user/throttle'])
 
     #
     # maintain run conditions for user mode and autopilot mode parts.
